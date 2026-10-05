@@ -158,16 +158,18 @@ fn complete_arg(
                 completions.extend(complete_subcommand(value, cmd));
             }
 
-            if let Some(positional) = cmd
-                .get_positionals()
-                .find(|p| p.get_index() == Some(pos_index))
-            {
-                completions.extend(complete_arg_value(
-                    arg.to_value(),
-                    positional,
-                    current_dir,
-                    0,
-                ));
+            if !has_attached_option_value(arg, cmd) {
+                if let Some(positional) = cmd
+                    .get_positionals()
+                    .find(|p| p.get_index() == Some(pos_index))
+                {
+                    completions.extend(complete_arg_value(
+                        arg.to_value(),
+                        positional,
+                        current_dir,
+                        0,
+                    ));
+                }
             }
             if !is_escaped {
                 completions.extend(complete_option(arg, cmd, current_dir));
@@ -241,6 +243,24 @@ fn complete_arg(
     });
 
     Ok(completions)
+}
+
+fn has_attached_option_value(arg: &clap_lex::ParsedArg<'_>, cmd: &clap::Command) -> bool {
+    if let Some((Ok(flag), Some(_))) = arg.to_long() {
+        return cmd
+            .get_arguments()
+            .any(|option| option.get_long() == Some(flag));
+    }
+
+    if let Some(short) = arg.to_short() {
+        let (_, option, mut remaining) = parse_shortflags(cmd, short);
+        return option.is_some()
+            && remaining
+                .next_value_os()
+                .is_some_and(|value| !value.is_empty());
+    }
+
+    false
 }
 
 fn complete_option(

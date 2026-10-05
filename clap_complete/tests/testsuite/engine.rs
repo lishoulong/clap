@@ -1213,9 +1213,6 @@ comma,tab
     assert_data_eq!(
         complete!(cmd, "--delimiter=comma,[TAB]"),
         snapbox::str![[r#"
---delimiter=comma,a_pos
---delimiter=comma,b_pos
---delimiter=comma,c_pos
 --delimiter=comma,comma
 --delimiter=comma,space
 --delimiter=comma,tab
@@ -1266,9 +1263,6 @@ comma,tab
     assert_data_eq!(
         complete!(cmd, "-D=comma,[TAB]"),
         snapbox::str![[r#"
--D=comma,a_pos
--D=comma,b_pos
--D=comma,c_pos
 -D=comma,comma
 -D=comma,space
 -D=comma,tab
